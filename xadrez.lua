@@ -475,26 +475,26 @@ function getls(letra, numero, cor, atacando)
 
     local direita = game.tabuleiro[somachar(letra, 2)]
     if direita then
-        if direita[numero+1] and (atacando or (direita[numero+1].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, 2), numero = numero+1}) end
-        if direita[numero-1] and (atacando or (direita[numero-1].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, 2), numero = numero-1}) end
+        if direita[numero+1] and (atacando or (direita[numero+1].cor ~= cor and direita[numero+1].char ~= "k")) then table.insert(premoves, {letra = somachar(letra, 2), numero = numero+1}) end
+        if direita[numero-1] and (atacando or (direita[numero-1].cor ~= cor and direita[numero-1].char ~= "k")) then table.insert(premoves, {letra = somachar(letra, 2), numero = numero-1}) end
     end
 
     local esquerda = game.tabuleiro[somachar(letra, -2)]
     if esquerda then
-        if esquerda[numero+1] and (atacando or (esquerda[numero+1].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, -2), numero = numero+1}) end
-        if esquerda[numero-1] and (atacando or (esquerda[numero-1].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, -2), numero = numero-1}) end
+        if esquerda[numero+1] and (atacando or (esquerda[numero+1].cor ~= cor and esquerda[numero+1].char ~= "k")) then table.insert(premoves, {letra = somachar(letra, -2), numero = numero+1}) end
+        if esquerda[numero-1] and (atacando or (esquerda[numero-1].cor ~= cor and esquerda[numero-1].char ~= "k")) then table.insert(premoves, {letra = somachar(letra, -2), numero = numero-1}) end
     end
 
     local baixo = game.tabuleiro[letra][numero-2]
     if baixo then
-        if game.tabuleiro[somachar(letra, 1)] and (atacando or (game.tabuleiro[somachar(letra, 1)][numero-2].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, 1), numero = numero-2}) end
-        if game.tabuleiro[somachar(letra, -1)] and (atacando or (game.tabuleiro[somachar(letra, -1)][numero-2].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, -1), numero = numero-2}) end
+        if game.tabuleiro[somachar(letra, 1)] and (atacando or (game.tabuleiro[somachar(letra, 1)][numero-2].cor ~= cor and game.tabuleiro[somachar(letra, 1)][numero-2].char ~= "k")) then table.insert(premoves, {letra = somachar(letra, 1), numero = numero-2}) end
+        if game.tabuleiro[somachar(letra, -1)] and (atacando or (game.tabuleiro[somachar(letra, -1)][numero-2].cor ~= cor and game.tabuleiro[somachar(letra, -1)][numero-2].char ~= "k")) then table.insert(premoves, {letra = somachar(letra, -1), numero = numero-2}) end
     end
 
     local cima = game.tabuleiro[letra][numero+2]
     if cima then
-        if game.tabuleiro[somachar(letra, 1)] and (atacando or (game.tabuleiro[somachar(letra, 1)][numero+2].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, 1), numero = numero+2}) end
-        if game.tabuleiro[somachar(letra, -1)] and (atacando or (game.tabuleiro[somachar(letra, -1)][numero+2].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, -1), numero = numero+2}) end
+        if game.tabuleiro[somachar(letra, 1)] and (atacando or (game.tabuleiro[somachar(letra, 1)][numero+2].cor ~= cor and game.tabuleiro[somachar(letra, 1)][numero+2].char ~= "k")) then table.insert(premoves, {letra = somachar(letra, 1), numero = numero+2}) end
+        if game.tabuleiro[somachar(letra, -1)] and (atacando or (game.tabuleiro[somachar(letra, -1)][numero+2].cor ~= cor and game.tabuleiro[somachar(letra, -1)][numero+2].char ~= "k")) then table.insert(premoves, {letra = somachar(letra, -1), numero = numero+2}) end
     end
 
     table.insert(moves, premoves)
@@ -736,7 +736,7 @@ while (not game.cheque.mate) do
     end
 end
 printtabuleiro()
-
+print(getpos())
 
 
 
