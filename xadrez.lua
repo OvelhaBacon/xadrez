@@ -37,6 +37,14 @@ function insertable(table1, table2)
     return table1
 end
 
+function achastring(string1, string2)
+    local contador = 0
+    for v in string.gmatch(string1, string2) do
+        contador = contador + 1
+    end
+    return contador
+end
+
 local chars = {"a","b","c","d","e","f","g","h"}
 local chars2 = {["a"] = 1, ["b"] = 2, ["c"] = 3, ["d"] = 4, ["e"] = 5, ["f"] = 6, ["g"] = 7, ["h"] = 8}
 
@@ -644,20 +652,52 @@ function updatepecas()
     updatemoves()
 end
 
+function conseguemate(pecas)
+    local peoes = achastring(pecas, "p")
+    local cavalos = achastring(pecas, "h")
+    local rainhas = achastring(pecas, "q")
+    local bispos = achastring(pecas, "b")
+    local torres = achastring(pecas, "r")
+
+    if peoes ~= 0 then return true end
+    if rainhas ~= 0 then return true end
+    if torres ~= 0 then return true end
+
+    if bispos > 1 then return true end
+    if cavalos > 1 then return true end
+
+    if cavalos > 0 and bispos > 0 then return true end
+
+    return false
+end
+
 function execmove(movestring)
     if not game.allmoves[game.qmjoga][movestring] then print("Movimento invalido") return end
 
     local comando = Split(movestring, " ")
 
+    if charat(comando[1], 1) == "p" then
+        if charat(comando[1], 3) == "1" or charat(comando[1], 3) == "8" then
+            game.tabuleiro[charat(comando[1], 2)][tonumber(charat(comando[1], 3))].char = "q"
+        end
+    end
+
     game.tabuleiro[charat(comando[3], 1)][tonumber(charat(comando[3], 2))] = game.tabuleiro[charat(comando[1], 2)][tonumber(charat(comando[1], 3))]
 
     game.tabuleiro[charat(comando[1], 2)][tonumber(charat(comando[1], 3))] = {char = " ", cor = "", moves = {}, cravada = false}
+
+    local possodamate = conseguemate(game.pecas[game.qmjoga])
+    local podedamate = conseguemate(game.pecas[inimigo(game.qmjoga)])
+
+    if not possodamate and not podedamate then
+        print("EMPATE POR FALTA DE MATERIAL")
+    end
 
     game.qmjoga = inimigo(game.qmjoga)
 
     updatepecas()
 
-
+    game.cheque.mate = false
     for i, v in pairs(game.allmoves[game.qmjoga]) do
         return
     end
@@ -671,7 +711,6 @@ end
 
 function randomplay()
     local negrice = {}
-
     for i, v in pairs(game.allmoves[game.qmjoga]) do
         table.insert(negrice, i)
     end
@@ -682,19 +721,15 @@ print("\n\n\n\n\n\n\n\n\n\n\n")
 setpos(game.startpos)
 printtabuleiro()
 local jogadas = 0
-while (not game.cheque.mate) and jogadas < 100 do
+while (not game.cheque.mate) and jogadas < 300 do
     if game.qmjoga == "B" then
-        local moveve = io.read()
-        if moveve == "banana" then
-            printtable(game.allmoves[game.qmjoga])
-        end
-        execmove(moveve)
+        randomplay()
     else
         randomplay()
     end
     printtabuleiro()
     jogadas = jogadas + 1
-    Sleep(1)
+    --Sleep(1)
 end
 
 
