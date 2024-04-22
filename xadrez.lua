@@ -518,7 +518,7 @@ function updateataques()
                             game.cheque.cordeqm = inimigo(k.cor)
                             game.cheque.emqm = {char = "k", letra = ataque.letra, numero = ataque.numero}
                             ataques[#ataques] = {letra = i, numero = j}
-                            table.insert(game.cheque.porqm, k.char..i..j {char = k.char, letra = i, numero = j, path = ataques})
+                            table.insert(game.cheque.porqm, {char = k.char, letra = i, numero = j, path = ataques})
                         end
                     end
                 end
@@ -536,14 +536,31 @@ function updatemoves()
                 local tdsmoves = getmoves(i, j, k.cor, k.char)
                 for l, moves in pairs(tdsmoves) do
                     for index, move in pairs(moves) do
-                        local string_command = k.char..i..j .. " to " .. move.letra..move.numero
-                        game.allmoves[k.cor][string_command] = 1
+                        if game.cheque.cordeqm == k.cor then
+                            if k.char == "k" then
+                                local string_command = k.char..i..j .. " to " .. move.letra..move.numero
+                                game.allmoves[k.cor][string_command] = 1
+                            elseif #game.cheque.porqm < 2 then
+                                for _, atacante in pairs(game.cheque.porqm) do
+                                    for idpath, loc in pairs(atacante.path) do
+                                        if move.letra == loc.letra and move.numero == loc.numero then
+                                            local string_command = k.char..i..j .. " to " .. move.letra..move.numero
+                                            game.allmoves[k.cor][string_command] = 1
+                                        end
+                                    end
+                                end
+                            end
+                        else
+                            local string_command = k.char..i..j .. " to " .. move.letra..move.numero
+                            game.allmoves[k.cor][string_command] = 1
+                        end
                     end
                 end
             end
         end
     end
 end
+
 
 function updatepecas()
     for i, v in pairs(game.tabuleiro) do
@@ -574,14 +591,11 @@ end
 print("\n\n\n\n\n\n\n\n\n\n\n")
 setpos(game.startpos)
 printtabuleiro()
-execmove("pe2 to e3")
-execmove("pd7 to d6")
+execmove("pe2 to e4")
+execmove("pe7 to e5")
 execmove("qd1 to g4")
-execmove("ke8 to d7")
-execmove("pe7 to e6")
-execmove("pa2 to a3")
-execmove("ke8 to d7")
-execmove("pb2 to b4")
-execmove("pd6 to d5")
+execmove("pf7 to f5")
+execmove("qg4 to h5")
+execmove("pa7 to a6")
 printtabuleiro()
 
