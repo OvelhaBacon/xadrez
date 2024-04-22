@@ -65,7 +65,12 @@ function printtabuleiro()
     for j = 8, 1, -1 do
         local linha = ""
         for i = 1, 8 do
-            linha = linha .. game.tabuleiro[chars[i]][j].char .. " "
+            local target = game.tabuleiro[chars[i]][j]
+            if target.cor == "B" then
+                linha = linha .. string.upper(game.tabuleiro[chars[i]][j].char) .. " "
+            else
+                linha = linha .. game.tabuleiro[chars[i]][j].char .. " "
+            end
         end
         print(linha)
     end
@@ -174,7 +179,7 @@ getretass = {
                 end
                 break
             else
-                if cravada.letra == "" then table.insert(moves, {letra=letra,numero=elnumero}) end
+                if cravada.letra == "" and (atacando or elverificado.char ~= "k")  then table.insert(moves, {letra=letra,numero=elnumero}) end
                 if elverificado.cor == inimigo then
                     if elverificado.char == "k" then
                         if cravada.letra ~= "" and cravada.pdcrava then game.tabuleiro[cravada.letra][cravada.numero].cravada = true end
@@ -207,7 +212,7 @@ getretass = {
                 if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
                 break
             else
-                if cravada.letra == "" then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                if cravada.letra == "" and (atacando or elverificado.char ~= "k")  then table.insert(moves, {letra=elletra,numero=elnumero}) end
                 if elverificado.cor == inimigo then
                     if elverificado.char == "k" then
                         if cravada.letra ~= "" and cravada.pdcrava then
@@ -242,7 +247,7 @@ getretass = {
                 if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
                 break
             else
-                if cravada.letra == "" then
+                if cravada.letra == "" and (atacando or elverificado.char ~= "k")  then
                     table.insert(moves, {letra=elletra,numero=elnumero})
                 end
                 if elverificado.cor == inimigo then
@@ -279,7 +284,7 @@ getretass = {
                 if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
                 break
             else
-                if cravada.letra == "" then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                if cravada.letra == "" and (atacando or elverificado.char ~= "k")  then table.insert(moves, {letra=elletra,numero=elnumero}) end
                 if elverificado.cor == inimigo then
                     if elverificado.char == "k" then
                         if cravada.letra ~= "" and cravada.pdcrava then
@@ -317,7 +322,7 @@ getdiagonaiss = {
                 if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
                 break
             else
-                if cravada.letra == "" then
+                if cravada.letra == "" and (atacando or elverificado.char ~= "k")  then
                     table.insert(moves, {letra=elletra,numero=elnumero})
                 end
                 if elverificado.cor == inimigo then
@@ -354,7 +359,7 @@ getdiagonaiss = {
                 if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
                 break
             else
-                if cravada.letra == "" then
+                if cravada.letra == "" and (atacando or elverificado.char ~= "k")  then
                     table.insert(moves, {letra=elletra,numero=elnumero})
                 end
                 if elverificado.cor == inimigo then
@@ -389,7 +394,7 @@ getdiagonaiss = {
                 if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
                 break
             else
-                if cravada.letra == "" then
+                if cravada.letra == "" and (atacando or elverificado.char ~= "k")  then
                     table.insert(moves, {letra=elletra,numero=elnumero})
                 end
                 if elverificado.cor == inimigo then
@@ -426,7 +431,7 @@ getdiagonaiss = {
                 if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
                 break
             else
-                if cravada.letra == "" then
+                if cravada.letra == "" and (atacando or elverificado.char ~= "k")  then
                     table.insert(moves, {letra=elletra,numero=elnumero})
                 end
                 if elverificado.cor == inimigo then
@@ -677,7 +682,7 @@ function execmove(movestring)
     local comando = Split(movestring, " ")
 
     if charat(comando[1], 1) == "p" then
-        if charat(comando[1], 3) == "1" or charat(comando[1], 3) == "8" then
+        if charat(comando[3], 2) == "1" or charat(comando[3], 2) == "8" then
             game.tabuleiro[charat(comando[1], 2)][tonumber(charat(comando[1], 3))].char = "q"
         end
     end
@@ -691,6 +696,8 @@ function execmove(movestring)
 
     if not possodamate and not podedamate then
         print("EMPATE POR FALTA DE MATERIAL")
+        game.cheque.mate = true
+        return
     end
 
     game.qmjoga = inimigo(game.qmjoga)
@@ -702,7 +709,7 @@ function execmove(movestring)
         return
     end
     if game.cheque.cordeqm ~= "" then
-        print(inimigo(game.qmjoga) .. " deu MATE no" .. game.qmjoga)
+        print(inimigo(game.qmjoga) .. " deu MATE no " .. game.qmjoga)
     else
         print(inimigo(game.qmjoga) .. " AFOGO o " .. game.qmjoga)
     end
@@ -720,17 +727,16 @@ end
 print("\n\n\n\n\n\n\n\n\n\n\n")
 setpos(game.startpos)
 printtabuleiro()
-local jogadas = 0
-while (not game.cheque.mate) and jogadas < 300 do
+
+while (not game.cheque.mate) do
     if game.qmjoga == "B" then
         randomplay()
     else
         randomplay()
     end
-    printtabuleiro()
-    jogadas = jogadas + 1
     --Sleep(1)
 end
+printtabuleiro()
 
 
 
