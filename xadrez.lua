@@ -734,7 +734,6 @@ while (not game.cheque.mate) do
     else
         randomplay()
     end
-    --Sleep(1)
 end
 printtabuleiro()
 
