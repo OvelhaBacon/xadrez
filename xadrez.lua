@@ -1,3 +1,7 @@
+function  Sleep(seconds)
+    os.execute("timeout " .. seconds ..  " > nul")
+end
+
 function printtable(table)
     if type(table) ~= "table" then
         print("isso n e uma tabela :D")
@@ -43,7 +47,8 @@ local game = {
     poderoque = {branco = {"1","1","1"}, preto = {"1","1","1"}},
     allmoves = {["B"] = {}, ["P"] = {}},
     casas_atacadas = {["B"] = {}, ["P"] = {}},
-    cheque = {cordeqm = "", emqm = "", porqm = {}},
+    cheque = {cordeqm = "", emqm = "", porqm = {}, mate = false},
+    pecas = {["B"] = "", ["P"] = ""},
 }
 
 function printtabuleiro()
@@ -67,7 +72,8 @@ function reset_tabuleiro()
         poderoque = {branco = {"1","1","1"}, preto = {"1","1","1"}},
         allmoves = {["B"] = {}, ["P"] = {}},
         casas_atacadas = {["B"] = {}, ["P"] = {}},
-        cheque = {cordeqm = "", emqm = "", porqm = {}},
+        cheque = {cordeqm = "", emqm = "", porqm = {}, mate = false},
+        pecas = {["B"] = "", ["P"] = ""},
     }
     local tabuleiro = {}
     for j = 1, 8 do
@@ -625,9 +631,11 @@ function updatemoves()
 end
 
 function updatepecas()
+    game.pecas = {["B"] = "", ["P"] = ""}
     for i, v in pairs(game.tabuleiro) do
         for j, k in pairs(v) do
             if k.cor ~= "" then
+                game.pecas[k.cor] = game.pecas[k.cor] .. k.char
                 game.tabuleiro[i][j].cravada = false
             end
         end
@@ -653,7 +661,12 @@ function execmove(movestring)
     for i, v in pairs(game.allmoves[game.qmjoga]) do
         return
     end
-    print("MATE")
+    if game.cheque.cordeqm ~= "" then
+        print(inimigo(game.qmjoga) .. " deu MATE no" .. game.qmjoga)
+    else
+        print(inimigo(game.qmjoga) .. " AFOGO o " .. game.qmjoga)
+    end
+    game.cheque.mate = true
 end
 
 function randomplay()
@@ -662,21 +675,28 @@ function randomplay()
     for i, v in pairs(game.allmoves[game.qmjoga]) do
         table.insert(negrice, i)
     end
-
     execmove(negrice[math.random(1,#negrice)])
 end
 
 print("\n\n\n\n\n\n\n\n\n\n\n")
 setpos(game.startpos)
 printtabuleiro()
-execmove("pe2 to e4")
-execmove("pe7 to e5")
-execmove("qd1 to f3")
-execmove("hb8 to a6")
-execmove("bf1 to c4")
-execmove("ha6 to b4")
-execmove("qf3 to f7")
-printtabuleiro()
+local jogadas = 0
+while (not game.cheque.mate) and jogadas < 100 do
+    if game.qmjoga == "B" then
+        local moveve = io.read()
+        if moveve == "banana" then
+            printtable(game.allmoves[game.qmjoga])
+        end
+        execmove(moveve)
+    else
+        randomplay()
+    end
+    printtabuleiro()
+    jogadas = jogadas + 1
+    Sleep(1)
+end
+
 
 
 
