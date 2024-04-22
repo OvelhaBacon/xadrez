@@ -43,11 +43,11 @@ local game = {
     poderoque = {branco = {"1","1","1"}, preto = {"1","1","1"}},
     allmoves = {["B"] = {}, ["P"] = {}},
     casas_atacadas = {["B"] = {}, ["P"] = {}},
-    cheque = {cordeqm = "", emqm = "", porqm = {}, mate = false},
+    cheque = {cordeqm = "", emqm = "", porqm = {}},
 }
 
 function printtabuleiro()
-    print("--------------------------------")
+    print("---------------" .. game.qmjoga .. "----------------")
     if game.tabuleiro["a"] == nil then return end
     for j = 8, 1, -1 do
         local linha = ""
@@ -139,328 +139,315 @@ function somachar(char, soma)
     return chars[atual+soma]
 end
 
-function getretas(letra, numero, cor, casas, socima, sobaixo, atacando)
-    local casas = casas or 7
-    if socima or sobaixo then
-        if numero == 7 or numero == 2 then
-            casas = 2
-        end
-    end
-    local moves = {}
-    local tabuleiro = game.tabuleiro
-    local inimigo = inimigo(cor)
+getretass = {
+    cima = function(letra, numero, cor, casas, atacando)
+        local casas = casas or 7
+        local moves = {}
+        local cravada = {letra = "", numero = "", pdcrava = true}
+        local inimigo = inimigo(cor)
+        local tabuleiro = game.tabuleiro
+        for crescente = 1, casas do --cima
+            local elletra = letra
+            local elnumero = numero+crescente
     
-    local cravada = {letra = "", numero = "", pdcrava = true}
-    local premoves = {}
-
-    if sobaixo then goto baixo end
-
-    for crescente = 1, casas do --cima
-        local elletra = letra
-        local elnumero = numero+crescente
-
-        local verificado = tabuleiro[elletra][elnumero]
-        if verificado == nil then break end
-        local elverificado = verificado
-        
-        if elverificado.cor == cor then
-            if atacando then
-                table.insert(premoves, {letra=letra,numero=elnumero})
-            end
-            break
-        else
-            if cravada.letra == "" then table.insert(premoves, {letra=letra,numero=elnumero}) end
-            if elverificado.cor == inimigo then
-                if elverificado.char == "k" then
-                    if cravada.letra ~= "" and cravada.pdcrava then game.tabuleiro[cravada.letra][cravada.numero].cravada = true end
-                    break
-                else
-                    if cravada.letra ~= "" then cravada.pdcrava = false end
-                    cravada.letra = letra
-                    cravada.numero = elnumero
+            local verificado = tabuleiro[elletra][elnumero]
+            if verificado == nil then break end
+            local elverificado = verificado
+            
+            if elverificado.cor == cor then
+                if atacando then
+                    table.insert(moves, {letra=letra,numero=elnumero})
                 end
-            end
-        end
-    end
-
-    table.insert(moves, premoves)
-
-    if socima then return moves end
-
-    ::baixo::
-
-    local cravada = {letra = "", numero = "", pdcrava = true}
-    premoves = {}
-
-    for crescente = 1, casas do --baixo
-        local elletra = letra
-        local elnumero = numero-crescente
-
-        local verificado = tabuleiro[elletra][elnumero]
-        local elverificado = verificado
-        if elverificado == nil then break end
-
-        if verificado.cor == cor then
-            if atacando then table.insert(premoves, {letra=elletra,numero=elnumero}) end
-            break
-        else
-            if cravada.letra == "" then table.insert(premoves, {letra=elletra,numero=elnumero}) end
-            if elverificado.cor == inimigo then
-                if elverificado.char == "k" then
-                    if cravada.letra ~= "" and cravada.pdcrava then
-                        game.tabuleiro[cravada.letra][cravada.numero].cravada = true
+                break
+            else
+                if cravada.letra == "" then table.insert(moves, {letra=letra,numero=elnumero}) end
+                if elverificado.cor == inimigo then
+                    if elverificado.char == "k" then
+                        if cravada.letra ~= "" and cravada.pdcrava then game.tabuleiro[cravada.letra][cravada.numero].cravada = true end
+                        break
+                    else
+                        if cravada.letra ~= "" then cravada.pdcrava = false end
+                        cravada.letra = letra
+                        cravada.numero = elnumero
                     end
-                    break
-                else
-                    if cravada.letra ~= "" then cravada.pdcrava = false end
-                    cravada.letra = elletra
-                    cravada.numero = elnumero
                 end
             end
         end
-    end
-
-    table.insert(moves, premoves)
-
-    if sobaixo then return moves end
+        return moves
+    end,
+    baixo = function(letra, numero, cor, casas, atacando)
+        local casas = casas or 7
+        local moves = {}
+        local cravada = {letra = "", numero = "", pdcrava = true}
+        local inimigo = inimigo(cor)
+        local tabuleiro = game.tabuleiro
+        for crescente = 1, casas do --baixo
+            local elletra = letra
+            local elnumero = numero-crescente
     
-    local cravada = {letra = "", numero = "", pdcrava = true}
-    premoves = {}
-
-    for crescente = 1, casas do --direita
-        local elletra = somachar(letra, crescente)
-        local elnumero = numero
-
-        local verificado = tabuleiro[elletra]
-        if verificado == nil then break end
-        local elverificado = verificado[elnumero]
-
-        if elverificado.cor == cor then
-            if atacando then table.insert(premoves, {letra=elletra,numero=elnumero}) end
-            break
-        else
-            if cravada.letra == "" then
-                table.insert(premoves, {letra=elletra,numero=elnumero})
-            end
-            if elverificado.cor == inimigo then
-                if elverificado.char == "k" then
-                    if cravada.letra ~= "" and cravada.pdcrava then
-                        game.tabuleiro[cravada.letra][cravada.elnumero].cravada = true
+            local verificado = tabuleiro[elletra][elnumero]
+            local elverificado = verificado
+            if elverificado == nil then break end
+    
+            if verificado.cor == cor then
+                if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                break
+            else
+                if cravada.letra == "" then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                if elverificado.cor == inimigo then
+                    if elverificado.char == "k" then
+                        if cravada.letra ~= "" and cravada.pdcrava then
+                            game.tabuleiro[cravada.letra][cravada.numero].cravada = true
+                        end
+                        break
+                    else
+                        if cravada.letra ~= "" then cravada.pdcrava = false end
+                        cravada.letra = elletra
+                        cravada.numero = elnumero
                     end
-                    break
-                else
-                    if cravada.letra ~= "" then cravada.pdcrava = false end
-                    cravada.letra = elletra
-                    cravada.elnumero = elnumero
                 end
             end
         end
-    end
-
-    table.insert(moves, premoves)
-
-    local cravada = {letra = "", numero = "", pdcrava = true}
-    premoves = {}
-
-    for crescente = 1, casas do --esquerda
-        local elletra = somachar(letra, -crescente)
-        local elnumero = numero
-
-        local verificado = tabuleiro[elletra]
-        if verificado == nil then break end
-        local elverificado = verificado[elnumero]
-
-        if elverificado.cor == cor then
-            if atacando then table.insert(premoves, {letra=elletra,numero=elnumero}) end
-            break
-        else
-            if cravada.letra == "" then table.insert(premoves, {letra=elletra,numero=elnumero}) end
-            if elverificado.cor == inimigo then
-                if elverificado.char == "k" then
-                    if cravada.letra ~= "" and cravada.pdcrava then
-                        game.tabuleiro[cravada.letra][cravada.numero].cravada = true
+        return moves
+    end,
+    direita = function(letra, numero, cor, casas, atacando)
+        local casas = casas or 7
+        local moves = {}
+        local cravada = {letra = "", numero = "", pdcrava = true}
+        local inimigo = inimigo(cor)
+        local tabuleiro = game.tabuleiro
+        for crescente = 1, casas do --direita
+            local elletra = somachar(letra, crescente)
+            local elnumero = numero
+    
+            local verificado = tabuleiro[elletra]
+            if verificado == nil then break end
+            local elverificado = verificado[elnumero]
+    
+            if elverificado.cor == cor then
+                if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                break
+            else
+                if cravada.letra == "" then
+                    table.insert(moves, {letra=elletra,numero=elnumero})
+                end
+                if elverificado.cor == inimigo then
+                    if elverificado.char == "k" then
+                        if cravada.letra ~= "" and cravada.pdcrava then
+                            game.tabuleiro[cravada.letra][cravada.elnumero].cravada = true
+                        end
+                        break
+                    else
+                        if cravada.letra ~= "" then cravada.pdcrava = false end
+                        cravada.letra = elletra
+                        cravada.elnumero = elnumero
                     end
-                    break
-                else
-                    if cravada.letra ~= "" then cravada.pdcrava = false end
-                    cravada.letra = elletra
-                    cravada.numero = elnumero
                 end
             end
         end
+        return moves
+    end,
+    esquerda = function(letra, numero, cor, casas, atacando)
+        local casas = casas or 7
+        local moves = {}
+        local cravada = {letra = "", numero = "", pdcrava = true}
+        local inimigo = inimigo(cor)
+        local tabuleiro = game.tabuleiro
+        for crescente = 1, casas do --esquerda
+            local elletra = somachar(letra, -crescente)
+            local elnumero = numero
+    
+            local verificado = tabuleiro[elletra]
+            if verificado == nil then break end
+            local elverificado = verificado[elnumero]
+    
+            if elverificado.cor == cor then
+                if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                break
+            else
+                if cravada.letra == "" then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                if elverificado.cor == inimigo then
+                    if elverificado.char == "k" then
+                        if cravada.letra ~= "" and cravada.pdcrava then
+                            game.tabuleiro[cravada.letra][cravada.numero].cravada = true
+                        end
+                        break
+                    else
+                        if cravada.letra ~= "" then cravada.pdcrava = false end
+                        cravada.letra = elletra
+                        cravada.numero = elnumero
+                    end
+                end
+            end
+        end
+        return moves
     end
+}
 
-    table.insert(moves, premoves)
+getdiagonaiss = {
+    direitacima = function(letra, numero, cor, casas, atacando)
+        local casas = casas or 7
+        local moves = {}
+        local tabuleiro = game.tabuleiro
+        local inimigo = inimigo(cor)
+        local cravada = {letra = "", numero = "", pdcrava = true}
+        for crescente = 1, casas do --direita cima
+            local elletra = somachar(letra, crescente)
+            local elnumero = numero+crescente
+    
+            local verificado = tabuleiro[elletra]
+            if verificado == nil or verificado[elnumero] == nil then break end
+            local elverificado = verificado[elnumero]
+    
+            if elverificado.cor == cor then
+                if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                break
+            else
+                if cravada.letra == "" then
+                    table.insert(moves, {letra=elletra,numero=elnumero})
+                end
+                if elverificado.cor == inimigo then
+                    if elverificado.char == "k" then
+                        if cravada.letra ~= "" and cravada.pdcrava then
+                            game.tabuleiro[cravada.letra][cravada.numero].cravada = true
+                        end
+                        break
+                    else
+                        if cravada.letra ~= "" then cravada.pdcrava = false end
+                        cravada.letra = elletra
+                        cravada.numero = elnumero
+                    end
+                end
+            end
+        end
+        return moves
+    end,
+    esquerdacima = function(letra, numero, cor, casas, atacando)
+        local casas = casas or 7
+        local moves = {}
+        local tabuleiro = game.tabuleiro
+        local inimigo = inimigo(cor)
+        local cravada = {letra = "", numero = "", pdcrava = true}
+        for crescente = 1, casas do --esquerda cima
+            local elletra = somachar(letra, -crescente)
+            local elnumero = numero+crescente
+    
+            local verificado = tabuleiro[elletra]
+            if verificado == nil or verificado[elnumero] == nil then break end
+            local elverificado = verificado[elnumero]
+    
+            if elverificado.cor == cor then
+                if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                break
+            else
+                if cravada.letra == "" then
+                    table.insert(moves, {letra=elletra,numero=elnumero})
+                end
+                if elverificado.cor == inimigo then
+                    if elverificado.char == "k" then
+                        if cravada.letra ~= "" and cravada.pdcrava then game.tabuleiro[cravada.letra][cravada.numero].cravada = true end
+                        break
+                    else
+                        if cravada.letra ~= "" then cravada.pdcrava = false end
+                        cravada.letra = elletra
+                        cravada.numero = elnumero
+                    end
+                end
+            end
+        end
+        return moves
+    end,
+    direitabaixo = function(letra, numero, cor, casas, atacando)
+        local casas = casas or 7
+        local moves = {}
+        local tabuleiro = game.tabuleiro
+        local inimigo = inimigo(cor)
+        local cravada = {letra = "", numero = "", pdcrava = true}
+        for crescente = 1, casas do --direita baixo
+            local elletra = somachar(letra, crescente)
+            local elnumero = numero-crescente
+    
+            local verificado = tabuleiro[elletra]
+            if verificado == nil or verificado[elnumero] == nil then break end
+            local elverificado = verificado[elnumero]
+    
+            if elverificado.cor == cor then
+                if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                break
+            else
+                if cravada.letra == "" then
+                    table.insert(moves, {letra=elletra,numero=elnumero})
+                end
+                if elverificado.cor == inimigo then
+                    if elverificado.char == "k" then
+                        if cravada.letra ~= "" and cravada.pdcrava then
+                            game.tabuleiro[cravada.letra][cravada.numero].cravada = true
+                        end
+                        break
+                    else
+                        if cravada.letra ~= "" then cravada.pdcrava = false end
+                        cravada.letra = elletra
+                        cravada.numero = elnumero
+                    end
+                end
+            end
+        end
+        return moves
+    end,
+    esquerdabaixo = function(letra, numero, cor, casas, atacando)
+        local casas = casas or 7
+        local moves = {}
+        local tabuleiro = game.tabuleiro
+        local inimigo = inimigo(cor)
+        local cravada = {letra = "", numero = "", pdcrava = true}
+        for crescente = 1, casas do --esquerda baixo
+            local elletra = somachar(letra, -crescente)
+            local elnumero = numero-crescente
+    
+            local verificado = tabuleiro[elletra]
+            if verificado == nil or verificado[elnumero] == nil then break end
+            local elverificado = verificado[elnumero]
+    
+            if elverificado.cor == cor then
+                if atacando then table.insert(moves, {letra=elletra,numero=elnumero}) end
+                break
+            else
+                if cravada.letra == "" then
+                    table.insert(moves, {letra=elletra,numero=elnumero})
+                end
+                if elverificado.cor == inimigo then
+                    if elverificado.char == "k" then
+                        if cravada.letra ~= "" and cravada.pdcrava then
+                            game.tabuleiro[cravada.letra][cravada.numero].cravada = true
+                        end
+                        break
+                    else
+                        if cravada.letra ~= "" then cravada.pdcrava = false end
+                        cravada.letra = elletra
+                        cravada.numero = elnumero
+                    end
+                end
+            end
+        end
+        return moves
+    end,
+}
 
-    return moves
-end
-
-function getdiagonais(letra, numero, cor, casas, peao, socima, sobaixo, atacando)
+function getvolta(letra, numero, cor, casas, atacando)
     local casas = casas or 7
     local moves = {}
-    local tabuleiro = game.tabuleiro
-    local inimigo = inimigo(cor)
-
-    local cravada = {letra = "", numero = "", pdcrava = true}
-    local premoves = {}
-
-    if sobaixo then goto baixo end
-
-    for crescente = 1, casas do --direita cima
-        local elletra = somachar(letra, crescente)
-        local elnumero = numero+crescente
-
-        local verificado = tabuleiro[elletra]
-        if verificado == nil or verificado[elnumero] == nil then break end
-        local elverificado = verificado[elnumero]
-
-        if elverificado.cor == cor then
-            if atacando then table.insert(premoves, {letra=elletra,numero=numero}) end
-            break
-        else
-            if cravada.letra == "" and ((not peao) or elverificado.cor == inimigo) then
-                table.insert(premoves, {letra=elletra,numero=elnumero})
-            end
-            if elverificado.cor == inimigo then
-                if elverificado.char == "k" then
-                    if cravada.letra ~= "" and cravada.pdcrava then
-                        game.tabuleiro[cravada.letra][cravada.numero].cravada = true
-                    end
-                    break
-                else
-                    if cravada.letra ~= "" then cravada.pdcrava = false end
-                    cravada.letra = elletra
-                    cravada.numero = elnumero
-                end
-            end
-        end
-    end
-
-    table.insert(moves, premoves)
-
-    cravada = {letra = "", numero = "", pdcrava = true}
-    premoves = {}
-
-    for crescente = 1, casas do --esquerda cima
-        local elletra = somachar(letra, -crescente)
-        local elnumero = numero+crescente
-
-        local verificado = tabuleiro[elletra]
-        if verificado == nil or verificado[elnumero] == nil then break end
-        local elverificado = verificado[elnumero]
-
-        if elverificado.cor == cor then
-            if atacando then table.insert(premoves, {letra=elletra,numero=numero}) end
-            break
-        else
-            if cravada.letra == "" and ((not peao) or elverificado.cor == inimigo) then
-                table.insert(premoves, {letra=elletra,numero=elnumero})
-            end
-            if elverificado.cor == inimigo then
-                if elverificado.char == "k" then
-                    if cravada.letra ~= "" and cravada.pdcrava then game.tabuleiro[cravada.letra][cravada.numero].cravada = true end
-                    break
-                else
-                    if cravada.letra ~= "" then cravada.pdcrava = false end
-                    cravada.letra = elletra
-                    cravada.numero = elnumero
-                end
-            end
-        end
-    end
-
-    table.insert(moves, premoves)
-
-    if socima then return moves end
-
-    ::baixo::
-
-    cravada = {letra = "", numero = "", pdcrava = true}
-    premoves = {}
-
-    for crescente = 1, casas do --direita baixo
-        local elletra = somachar(letra, crescente)
-        local elnumero = numero-crescente
-
-        local verificado = tabuleiro[elletra]
-        if verificado == nil or verificado[elnumero] == nil then break end
-        local elverificado = verificado[elnumero]
-
-        if elverificado.cor == cor then
-            if atacando then table.insert(premoves, {letra=elletra,numero=numero}) end
-            break
-        else
-            if cravada.letra == "" and ((not peao) or elverificado.cor == inimigo) then
-                table.insert(premoves, {letra=elletra,numero=elnumero})
-            end
-            if elverificado.cor == inimigo then
-                if elverificado.char == "k" then
-                    if cravada.letra ~= "" and cravada.pdcrava then
-                        game.tabuleiro[cravada.letra][cravada.numero].cravada = true
-                    end
-                    break
-                else
-                    if cravada.letra ~= "" then cravada.pdcrava = false end
-                    cravada.letra = elletra
-                    cravada.numero = elnumero
-                end
-            end
-        end
-    end
-
-    table.insert(moves, premoves)
-
-    cravada = {letra = "", numero = "", pdcrava = true}
-    premoves = {}
-
-    for crescente = 1, casas do --esquerda baixo
-        local elletra = somachar(letra, -crescente)
-        local elnumero = numero-crescente
-
-        local verificado = tabuleiro[elletra]
-        if verificado == nil or verificado[elnumero] == nil then break end
-        local elverificado = verificado[elnumero]
-
-        if elverificado.cor == cor then
-            if atacando then table.insert(premoves, {letra=elletra,numero=numero}) end
-            break
-        else
-            if cravada.letra == "" and ((not peao) or elverificado.cor == inimigo) then
-                table.insert(premoves, {letra=elletra,numero=elnumero})
-            end
-            if elverificado.cor == inimigo then
-                if elverificado.char == "k" then
-                    if cravada.letra ~= "" and cravada.pdcrava then
-                        game.tabuleiro[cravada.letra][cravada.numero].cravada = true
-                    end
-                    break
-                else
-                    if cravada.letra ~= "" then cravada.pdcrava = false end
-                    cravada.letra = elletra
-                    cravada.numero = elnumero
-                end
-            end
-        end
-    end
-
-    table.insert(moves, premoves)
-
+    table.insert(moves, getretass.cima(letra, numero, cor, casas, atacando))
+    table.insert(moves, getretass.baixo(letra, numero, cor, casas, atacando))
+    table.insert(moves, getretass.direita(letra, numero, cor, casas, atacando))
+    table.insert(moves, getretass.esquerda(letra, numero, cor, casas, atacando))
+    table.insert(moves, getdiagonaiss.direitacima(letra, numero, cor, casas, atacando))
+    table.insert(moves, getdiagonaiss.esquerdacima(letra, numero, cor, casas, atacando))
+    table.insert(moves, getdiagonaiss.direitabaixo(letra, numero, cor, casas, atacando))
+    table.insert(moves, getdiagonaiss.esquerdabaixo(letra, numero, cor, casas, atacando))
     return moves
 end
 
-function getvolta(letra, numero, cor, casas)
-    local casas = casas or 7
-    local moves = {}
-    for i, v in pairs(getretas(letra, numero, cor, casas)) do
-        table.insert(moves, v)
-    end
-    for i, v in pairs(getdiagonais(letra, numero, cor, casas)) do
-        table.insert(moves, v)
-    end
-    return moves
-end
-
-function getls(letra, numero, cor)
+function getls(letra, numero, cor, atacando)
     local moves = {}
     local tabuleiro = game.tabuleiro
     local premoves = {}
@@ -469,26 +456,26 @@ function getls(letra, numero, cor)
 
     local direita = game.tabuleiro[somachar(letra, 2)]
     if direita then
-        if direita[numero+1] and direita[numero+1].cor ~= cor then table.insert(premoves, {letra = somachar(letra, 2), numero = numero+1}) end
-        if direita[numero-1] and direita[numero-1].cor ~= cor then table.insert(premoves, {letra = somachar(letra, 2), numero = numero-1}) end
+        if direita[numero+1] and (atacando or (direita[numero+1].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, 2), numero = numero+1}) end
+        if direita[numero-1] and (atacando or (direita[numero-1].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, 2), numero = numero-1}) end
     end
 
     local esquerda = game.tabuleiro[somachar(letra, -2)]
     if esquerda then
-        if esquerda[numero+1] and esquerda[numero+1].cor ~= cor then table.insert(premoves, {letra = somachar(letra, -2), numero = numero+1}) end
-        if esquerda[numero-1] and esquerda[numero-1].cor ~= cor then table.insert(premoves, {letra = somachar(letra, -2), numero = numero-1}) end
+        if esquerda[numero+1] and (atacando or (esquerda[numero+1].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, -2), numero = numero+1}) end
+        if esquerda[numero-1] and (atacando or (esquerda[numero-1].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, -2), numero = numero-1}) end
     end
 
     local baixo = game.tabuleiro[letra][numero-2]
     if baixo then
-        if game.tabuleiro[somachar(letra, 1)] and game.tabuleiro[somachar(letra, 1)][numero-2].cor ~= cor then table.insert(premoves, {letra = somachar(letra, 1), numero = numero-2}) end
-        if game.tabuleiro[somachar(letra, -1)] and game.tabuleiro[somachar(letra, -1)][numero-2].cor ~= cor then table.insert(premoves, {letra = somachar(letra, -1), numero = numero-2}) end
+        if game.tabuleiro[somachar(letra, 1)] and (atacando or (game.tabuleiro[somachar(letra, 1)][numero-2].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, 1), numero = numero-2}) end
+        if game.tabuleiro[somachar(letra, -1)] and (atacando or (game.tabuleiro[somachar(letra, -1)][numero-2].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, -1), numero = numero-2}) end
     end
 
     local cima = game.tabuleiro[letra][numero+2]
     if cima then
-        if game.tabuleiro[somachar(letra, 1)] and game.tabuleiro[somachar(letra, 1)][numero+2].cor ~= cor then table.insert(premoves, {letra = somachar(letra, 1), numero = numero+2}) end
-        if game.tabuleiro[somachar(letra, -1)] and game.tabuleiro[somachar(letra, -1)][numero+2].cor ~= cor then table.insert(premoves, {letra = somachar(letra, -1), numero = numero+2}) end
+        if game.tabuleiro[somachar(letra, 1)] and (atacando or (game.tabuleiro[somachar(letra, 1)][numero+2].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, 1), numero = numero+2}) end
+        if game.tabuleiro[somachar(letra, -1)] and (atacando or (game.tabuleiro[somachar(letra, -1)][numero+2].cor ~= cor)) then table.insert(premoves, {letra = somachar(letra, -1), numero = numero+2}) end
     end
 
     table.insert(moves, premoves)
@@ -496,20 +483,28 @@ function getls(letra, numero, cor)
     return moves
 end
 
-function getmoves(letra, numero, cor, char)
+function getmoves(letra, numero, cor, char, atacando)
     local moves = {}
     local premoves = {}
+    local inimigo = inimigo(cor)
     if char == "h" then
-        return getls(letra, numero, cor)
+        return getls(letra, numero, cor, atacando)
     elseif char == "r" then
-        return getretas(letra, numero, cor)
+        table.insert(moves, getretass.cima(letra, numero, cor, nil, atacando))
+        table.insert(moves, getretass.baixo(letra, numero, cor, nil, atacando))
+        table.insert(moves, getretass.direita(letra, numero, cor, nil, atacando))
+        table.insert(moves, getretass.esquerda(letra, numero, cor, nil, atacando))
+        return moves
     elseif char == "b" then
-        return getdiagonais(letra, numero, cor)
+        table.insert(moves, getdiagonaiss.direitacima(letra, numero, cor, nil, atacando))
+        table.insert(moves, getdiagonaiss.esquerdacima(letra, numero, cor, nil, atacando))
+        table.insert(moves, getdiagonaiss.direitabaixo(letra, numero, cor, nil, atacando))
+        table.insert(moves, getdiagonaiss.esquerdabaixo(letra, numero, cor, nil, atacando))
+        return moves
     elseif char == "q" then
-        return getvolta(letra, numero, cor)
+        return getvolta(letra, numero, cor, nil, atacando)
     elseif char == "k" then
-        local inimigo = inimigo(cor)
-        for i, tdsmoves in pairs(getvolta(letra, numero, cor, 1)) do
+        for i, tdsmoves in pairs(getvolta(letra, numero, cor, 1, atacando)) do
             for index, move in pairs(tdsmoves) do
                 if not game.casas_atacadas[inimigo][move.letra..move.numero] then
                     table.insert(premoves, move)
@@ -520,12 +515,30 @@ function getmoves(letra, numero, cor, char)
         return moves
     elseif char == "p" then
         if cor == "B" then
-            moves = insertable(moves, getdiagonais(letra, numero, cor, 1, true, true, false))
-            moves = insertable(moves, getretas(letra, numero, cor, 1, true))
+            for i, v in pairs(getdiagonaiss.direitacima(letra, numero, cor, 1, atacando)) do
+                if game.tabuleiro[v.letra][v.numero].cor == inimigo then
+                    table.insert(moves, {v})
+                end
+            end
+            for i, v in pairs(getdiagonaiss.esquerdacima(letra, numero, cor, 1, atacando)) do
+                if game.tabuleiro[v.letra][v.numero].cor == inimigo then
+                    table.insert(moves, {v})
+                end
+            end
+            table.insert(moves, getretass.cima(letra, numero, cor, numero==2 and 2 or 1, atacando))
             return moves
         else
-            moves = insertable(moves, getdiagonais(letra, numero, cor, 1, true, false, true))
-            moves = insertable(moves, getretas(letra, numero, cor, 1, false, true))
+            for i, v in pairs(getdiagonaiss.direitabaixo(letra, numero, cor, 1, atacando)) do
+                if game.tabuleiro[v.letra][v.numero].cor == inimigo then
+                    table.insert(moves, {v})
+                end
+            end
+            for i, v in pairs(getdiagonaiss.esquerdabaixo(letra, numero, cor, 1, atacando)) do
+                if game.tabuleiro[v.letra][v.numero].cor == inimigo then
+                    table.insert(moves, {v})
+                end
+            end
+            table.insert(moves, getretass.baixo(letra, numero, cor, numero==7 and 2 or 1, atacando))
             return moves
         end
     else
@@ -534,12 +547,21 @@ function getmoves(letra, numero, cor, char)
 end
 
 function getataques(letra, numero, cor, char)
+    local ataques = {}
     if char == "p" then
-        return getdiagonais(letra, numero, cor, 1, false, cor == "P")
+        if cor == "B" then
+            table.insert(ataques, getdiagonaiss.direitacima(letra, numero, cor, 1, true))
+            table.insert(ataques, getdiagonaiss.esquerdacima(letra, numero, cor, 1, true))
+            return ataques
+        else
+            table.insert(ataques, getdiagonaiss.direitabaixo(letra, numero, cor, 1, true))
+            table.insert(ataques, getdiagonaiss.esquerdabaixo(letra, numero, cor, 1, true))
+            return ataques
+        end
     elseif char == "k" then
-        return getvolta(letra, numero, cor, 1)
+        return getvolta(letra, numero, cor, 1, true)
     else
-        return getmoves(letra, numero, cor, char)
+        return getmoves(letra, numero, cor, char, true)
     end
 end
 
@@ -554,7 +576,8 @@ function updateataques()
                 for l, ataques in pairs(tdsataques) do
                     for index, ataque in pairs(ataques) do
                         game.casas_atacadas[k.cor][ataque.letra..ataque.numero] = 1
-                        if game.tabuleiro[ataque.letra][ataque.numero].char == "k" then
+                        local alvo = game.tabuleiro[ataque.letra][ataque.numero]
+                        if alvo.char == "k" and alvo.cor ~= k.cor then
                             game.cheque.cordeqm = inimigo(k.cor)
                             game.cheque.emqm = {char = "k", letra = ataque.letra, numero = ataque.numero}
                             ataques[#ataques] = {letra = i, numero = j}
@@ -625,6 +648,12 @@ function execmove(movestring)
     game.qmjoga = inimigo(game.qmjoga)
 
     updatepecas()
+
+
+    for i, v in pairs(game.allmoves[game.qmjoga]) do
+        return
+    end
+    print("MATE")
 end
 
 function randomplay()
@@ -647,6 +676,9 @@ execmove("hb8 to a6")
 execmove("bf1 to c4")
 execmove("ha6 to b4")
 execmove("qf3 to f7")
-execmove("ke8 to f7")
 printtabuleiro()
+
+
+
+
 
