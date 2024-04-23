@@ -55,8 +55,9 @@ local game = {
     poderoque = {branco = {"1","1","1"}, preto = {"1","1","1"}},
     allmoves = {["B"] = {}, ["P"] = {}},
     casas_atacadas = {["B"] = {}, ["P"] = {}},
-    cheque = {cordeqm = "", emqm = "", porqm = {}, mate = false},
+    cheque = {cordeqm = "", emqm = "", porqm = {}},
     pecas = {["B"] = "", ["P"] = ""},
+    acabo = {reason = "", whowin = ""},
 }
 
 function printtabuleiro()
@@ -85,8 +86,9 @@ function reset_tabuleiro()
         poderoque = {branco = {"1","1","1"}, preto = {"1","1","1"}},
         allmoves = {["B"] = {}, ["P"] = {}},
         casas_atacadas = {["B"] = {}, ["P"] = {}},
-        cheque = {cordeqm = "", emqm = "", porqm = {}, mate = false},
+        cheque = {cordeqm = "", emqm = "", porqm = {}},
         pecas = {["B"] = "", ["P"] = ""},
+        acabo = {reason = "", whowin = ""},
     }
     local tabuleiro = {}
     for j = 1, 8 do
@@ -585,7 +587,7 @@ function getataques(letra, numero, cor, char)
 end
 
 function updateataques()
-    game.cheque = {cordeqm = "", emqm = "", porqm = {}, mate = false}
+    game.cheque = {cordeqm = "", emqm = "", porqm = {}}
     game.casas_atacadas = {["B"] = {}, ["P"] = {}}
 
     for i, v in pairs(game.tabuleiro) do
@@ -696,7 +698,7 @@ function execmove(movestring)
 
     if not possodamate and not podedamate then
         print("EMPATE POR FALTA DE MATERIAL")
-        game.cheque.mate = true
+        game.acabo = {reason = "falta de material", whowin = ""}
         return
     end
 
@@ -704,16 +706,16 @@ function execmove(movestring)
 
     updatepecas()
 
-    game.cheque.mate = false
     for i, v in pairs(game.allmoves[game.qmjoga]) do
         return
     end
     if game.cheque.cordeqm ~= "" then
         print(inimigo(game.qmjoga) .. " deu MATE no " .. game.qmjoga)
+        game.acabo = {reason = "mate", whowin = inimigo(game.qmjoga)}
     else
         print(inimigo(game.qmjoga) .. " AFOGO o " .. game.qmjoga)
+        game.acabo = {reason = "afogamento", whowin = ""}
     end
-    game.cheque.mate = true
 end
 
 function randomplay()
@@ -724,18 +726,15 @@ function randomplay()
     execmove(negrice[math.random(1,#negrice)])
 end
 
-print("\n\n\n\n\n\n\n\n\n\n\n")
-setpos(game.startpos)
-printtabuleiro()
 
-while (not game.cheque.mate) do
-    if game.qmjoga == "B" then
+
+while game.acabo.reason ~= "mate" do
+    setpos(game.startpos)
+    while game.acabo.reason == "" do
         randomplay()
-    else
-        randomplay()
+        printtabuleiro()
     end
 end
-printtabuleiro()
 print(getpos())
 
 
